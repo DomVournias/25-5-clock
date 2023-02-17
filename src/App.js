@@ -23,12 +23,6 @@ function App() {
   const [isBreak, setIsBreak] = useState(false);
   const alarmRef = useRef(null);
 
-  const handleReset = () => {
-    setBreakLength(5);
-    setSessionLength(25);
-    alarmRef.current.stop();
-  };
-
   const handleControls = (action) => {
     if (!isPlaying) {
       if (action === "break-decrement") {
@@ -97,21 +91,29 @@ function App() {
     setBreakTime(breakConverted);
   }, [sessionLength, breakLength]);
 
+  function resetTime() {
+    clearInterval(timer);
+    setTimer(null);
+    setTime(timeConverted);
+    setIsBreak(true);
+    toogleBreaker();
+  }
+
+  function resetBreak() {
+    clearInterval(breaker);
+    setBreaker(null);
+    setBreakTime(breakConverted);
+    setIsBreak(false);
+    toggleTimer();
+  }
+
   useEffect(() => {
     if (time === 0 && isBreak === false) {
-      clearInterval(timer);
-      setTimer(null);
-      setTime(timeConverted);
-      setIsBreak(true);
-      toogleBreaker();
+      resetTime();
       alarmRef.current.play();
     }
     if (breakTime === 0 && isBreak === true) {
-      clearInterval(breaker);
-      setBreaker(null);
-      setBreakTime(breakConverted);
-      setIsBreak(false);
-      toggleTimer();
+      resetBreak();
     }
   }, [time, breakTime, isBreak]);
 
@@ -123,11 +125,14 @@ function App() {
     return circleDasharray;
   }
 
-  // useEffect(() => {
-  //   handleCircleAnimation();
-  // }, [time]);
-
-  // console.log(time, breakTime, timer, breaker);
+  function handleReset() {
+    setBreakLength(5);
+    setSessionLength(25);
+    resetTime();
+    resetBreak();
+    alarmRef.current.pause();
+    alarmRef.current.currentTime = 0;
+  }
 
   return (
     <div className="clock">
